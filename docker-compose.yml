@@ -1,0 +1,43 @@
+services:
+  php:
+    #command: bash -c "composer install && cp -n .env.dev .env && chmod 777 runtime web/assets && exec 'apache2-foreground'"
+    #build: .
+    image: yiisoftware/yii2-php:8.3-fpm-nginx
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app:delegated
+      - ./docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    expose:
+      - "12635"
+    ports:
+      - "80:80"
+    links:
+      - db
+    networks:
+      - postgres-compose-network
+    environment:
+      PHP_ENABLE_XDEBUG: 1
+      YII_ENV: ${YII_ENV}
+      YII_DEBUG: ${YII_DEBUG}
+      BYPASS_USER_AUTH: ${BYPASS_USER_AUTH}
+    depends_on:
+      - db
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-educacional}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+      POSTGRES_DB: dbEducacional
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres-compose-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+networks:
+  postgres-compose-network:
+    driver: bridge
+
+volumes:
+  pgdata:

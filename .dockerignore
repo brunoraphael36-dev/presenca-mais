@@ -1,0 +1,50 @@
+# Git files
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+
+# IDE files
+.idea
+.vscode
+nbproject
+.buildpath
+.project
+.settings
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Composer
+composer.phar
+
+# Testing
+phpunit.phar
+phpunit.xml
+tests/_output/*
+tests/_support/_generated
+codeception.yml
+
+# Development files
+Vagrantfile
+vagrant/
+docker-compose.yml
+
+# Build artifacts
+node_modules/
+package-lock.json
+
+# Runtime directories (will be created by container)
+runtime/*
+web/assets/*
+!web/assets/.gitkeep
+
+# Documentation
+README.md
+LICENSE.md
+
+# CI/CD files
+azure-pipelines.yml
+.gitlab-ci.yml

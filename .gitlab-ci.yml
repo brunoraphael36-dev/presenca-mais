@@ -1,0 +1,33 @@
+# [Documentação](http://10.1.0.75/snippets/3)
+
+stages:
+  - deploy
+
+cache:
+  paths:
+    - vendor/
+
+image: yiisoftware/yii2-php:7.3-apache
+
+before_script:
+  - apk add --update git openssh-client rsync sshpass nodejs
+  - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+  - eval $(ssh-agent -s)
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - chmod 600 ~/.ssh/config
+  - export SSHPASS=$USER_PASS
+  - echo -e "\n.rsync-filter\n.syncignore\n.env.*\nweb/uploads/\n.git/\n.git*\n*.old\n*.bak\n*.patch\n*.diff\ncomposer.*\nDockerfile\ndocker-compose.yml\ndocker/" >> .syncignore && dos2unix .syncignore
+
+stage_deploy:
+  only:
+    - master
+  stage: deploy
+  script:
+    - rm composer.lock
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - php composer.phar global require fxp/composer-asset-plugin --no-plugins
+    - php composer.phar install
+    - cat .env.prod > .env
+    - sshpass -e rsync -avuzpg --exclude-from '.syncignore' $CI_PROJECT_DIR/. fbadmin@191.232.173.255:/var/www/html/teste
